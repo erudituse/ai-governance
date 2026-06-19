@@ -106,9 +106,29 @@ Then add these lines to your `.gitignore` (so the hooks ship but local state doe
    exists, and `git push` / spec-less commits ask for confirmation.
 4. **(Optional)** Wire the CI gates — see **Running the gates** below.
 
-> **The hooks need `bash` + `jq`.** Native on macOS/Linux; on Windows use Git Bash or WSL.
-> If `jq` is missing the hooks fail **open** (safe — your work isn't blocked — but
-> enforcement is off); install `jq` to activate them.
+### On Windows
+
+The installer and the governance **docs** work on Windows with no setup — run the installer
+with a Windows path, e.g.:
+
+```
+node C:\path\to\this-kit\install.js
+```
+
+`CLAUDE.md` and the guides steer the agent on any OS. The **hooks** that *enforce* the
+process are shell scripts, so they need a Unix shell plus `jq`. Two quick steps turn them on:
+
+1. **Get `bash`.** Install [Git for Windows](https://git-scm.com/download/win) (gives you
+   **Git Bash**) or enable **WSL**. Claude Code uses Git Bash for hooks automatically when
+   it's present — no config needed.
+2. **Get `jq`.** Install it and make sure it's on your PATH — e.g. `winget install jqlang.jq`
+   (or Scoop / Chocolatey). Verify with `jq --version`.
+
+If `bash` or `jq` is missing, the hooks **fail open**: your work is never blocked, but the
+hard enforcement (the requirements-first gate and git gates) is simply **off** — only the
+written policy in `CLAUDE.md` applies. Install both to switch enforcement on. (To avoid the
+shell dependency entirely, the hooks could be ported to Node, which runs natively on Windows
+— not done yet.)
 
 ## Running the gates
 
