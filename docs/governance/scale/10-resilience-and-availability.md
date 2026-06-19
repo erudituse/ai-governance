@@ -48,12 +48,20 @@ Availability these aren't nice-to-haves — they're the criteria.
    error rate, latency) *and* the controls whose silent failure is worst (guide 05 infra
    invariants, backup success, certificate/secret expiry, the data-protection controls of
    guide 11). An alert no one receives is not monitoring.
-5. **Capacity & dependency awareness.** Know your scaling limits and your critical
+5. **Capacity & performance are managed.** Know your scaling limits and your critical
    external dependencies (and their failure modes); a subservice-org outage (guide 12) is
-   part of *your* availability story to users.
+   part of *your* availability story to users. Capacity/saturation is **alerted before
+   exhaustion**, and performance/load is **tested before a significant change** — SOC 2
+   Availability (A1.1) tests this, not just "we'll scale when it's slow."
 6. **Residual risk is named and accepted.** Where a resilience gap is knowingly carried
    (e.g. a DR scenario out of scope for now), it is documented and *explicitly accepted* by
    an accountable owner — never silently held (base playbook's offsite-backup lesson).
+7. **Incident & breach management.** A documented incident-response plan — severities
+   (base §11), named roles, a **breach-notification owner and legal timelines** (e.g. the
+   GDPR 72-hour rule) — with a **post-incident review (RCA) for every P1/P2** logged in an
+   **incident register** that feeds the risk register. The plan is *tested on a cadence*
+   (PCI 12.10; SOC 2 CC7.3–7.5; ISO A.5.24–A.5.28); an unexercised plan fails its first
+   real test, which is the breach itself.
 
 ---
 
@@ -81,6 +89,10 @@ drill exercises it.
   the on-call; backup-failure and expiry alerts are wired.
 - **Residual risk owned:** any carried resilience gap references an explicit accepted-risk
   entry with a named owner.
+- **Capacity headroom:** saturation alerts fire *before* limits are hit; a recent load test
+  exists for a significant change.
+- **Incident readiness:** the incident-response plan has a recent test/tabletop, and every
+  P1/P2 has a recorded RCA in the incident register.
 
 ---
 
@@ -91,5 +103,7 @@ drill exercises it.
 - [ ] Write `templates/bcp-dr-plan.md`; schedule a drill/tabletop cadence.
 - [ ] Wire availability + control-failure + expiry alerts to an on-call that receives them.
 - [ ] Record and have an owner accept any carried resilience residual risk.
+- [ ] Alert on capacity/saturation before exhaustion; load-test before a significant change.
+- [ ] Write + test the incident-response plan; name the breach-notification owner; RCA every P1/P2 into an incident register.
 
 > Next guide: **11 — Data Lifecycle & Crypto.**

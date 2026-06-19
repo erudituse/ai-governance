@@ -18,10 +18,12 @@ manual discipline should not silently become an automatic mechanism.
 | 4 · Requirements-first | 01 Requirements | A staged *source* change is accompanied by a *spec* change |
 | 5 · Secrets | 03 Coding · 06 Security | The staged diff adds no inline credentials |
 | 6 · Privacy | 06 Privacy | No raw PII field name appears inside a logging call |
+| 7 · Templates | 01–06 | The fill-in phase skeletons are present |
+| 8 · Close-out | 01 Requirements | A `shipped` / `implemented` story cites `file:symbol` code references that actually exist — catches the "AI said done, ticket never matched the code" stale close-out |
 
 Gates 4 and 5 inspect the **staged** diff, so they are most useful as a pre-commit
-hook. Gates 1–3 and 6 scan the repo and run anywhere. Checks that need project context
-(no staged changes, not a git repo) **skip** rather than fail.
+hook. Gates 1–3, 6, 7 and 8 scan the repo and run anywhere. Checks that need project
+context (no staged changes, not a git repo, no story files) **skip** rather than fail.
 
 ## Configure it (one block, top of the script)
 

@@ -130,6 +130,14 @@ accountable* for it.
   jobs, stories) separate from the engineering source-of-truth (requirements + design
   docs) — don't conflate them. Structure the backlog **Feature → Epic → Story → Task**
   with stable IDs: never renumber; orphan or deprecate, never reuse a counter.
+- **Consolidate, don't accumulate; close the loop on the origin story.** Stories are
+  append-only history — close by status (`shipped` / `cancelled` / `superseded`-with-
+  pointer), never delete; the engineering source-of-truth holds *current* behaviour,
+  rewritten in place so two live specs never contradict. On ship, the **origin** story is
+  updated to match the code (acceptance-criteria ↔ test ↔ `file:line`, divergences
+  recorded); a follow-on amends the origin or links back and flips its status — never a
+  silent new ticket that leaves the original stale. **Status is verified against code, not
+  taken on the assistant's word** — the maker never certifies its own close-out.
 - **Change & feature workflow — requirements-first (do NOT start at code):**
   1. **Requirements first** — document intended behaviour with *testable* acceptance
      criteria before any source edit. Documentation is the spec the code conforms to.
@@ -252,7 +260,12 @@ Assistant role : <e.g. Sr. Architect + Senior Full-Stack Developer> — shifts b
 
 ## 2.3 Architecture Rules  *(guide 03)*
 - Business logic in the backend; frontend is UI/UX only.
-- Create unit + integration tests for all functional features.
+- Create unit + integration tests for all functional features; **front-end features also
+  get component + E2E coverage, a test per §2.6 security control, and a baseline
+  accessibility check** (guide 04, rule 6) — testing is not backend-only.
+- Design observability in (a feature names the signals it emits) and threat-sketch any
+  trust-boundary change before build (guide 02); config (not just secrets) is typed +
+  validated at startup, and feature flags carry an owner + removal date (guide 03).
 - `<Traffic routing rule, e.g. all backend traffic via the frontend/middleware?>`
 - `<Any static-file / recon guards or path conventions reviewers must check?>`
 
@@ -269,6 +282,9 @@ Assistant role : <e.g. Sr. Architect + Senior Full-Stack Developer> — shifts b
 - `<Cross-surface consistency: name the integration test that locks any number shown on
   more than one surface; extend it before adding a new surface.>`
 - Non-trivial commits carry a `Rollback:` line and note what to watch post-deploy.
+- A human reads the diff before merge on shared-code / auth / data changes — the
+  assistant's self-review is an input, never the approval (the maker never certifies its
+  own work; even solo).
 
 ## 2.5 Deployment Security  *(guide 05, 06)*
 - Never include secrets / env files / connection strings / credentials / user data /
@@ -277,6 +293,9 @@ Assistant role : <e.g. Sr. Architect + Senior Full-Stack Developer> — shifts b
 - `<Promotion pipeline: define the path local → staging → prod and where gating lives.>`
 - `<Infra invariants enforced by the deploy script (e.g. firewall closed, TLS required)
   — list them; they must never be weakened.>`
+- Day-2: alert on user-facing health (error rate / latency / saturation) with numeric
+  thresholds, not only security controls; every alert links to a runbook + a named on-call
+  (guide 05).
 
 ### 2.5.1 Dependency / CVE Protocol  *(guide 06)*  — adopt as-is
 - Pin deps to exact versions. Run dependency + container scans as blocking gates.
@@ -289,9 +308,15 @@ Assistant role : <e.g. Sr. Architect + Senior Full-Stack Developer> — shifts b
 - Backend: typed schema with explicit field constraints; parameterised DB access only; a
   test covering boundaries + oversized + injection strings; bound any field feeding a
   downstream system call in length and charset.
+- Backend authorization: every record-bearing endpoint verifies the caller owns *that
+  specific object* (no IDOR), tested with a cross-user / cross-tenant negative test; log
+  security events (auth failure, authz denial, privilege change, secret access) with actor
+  + outcome, never payloads (guide 06).
 - Frontend: shared numeric input component (no bare permissive number inputs); safe
   rendering (no raw HTML injection of user content); URL-scheme allowlist; `target="_blank"`
   → `rel="noopener noreferrer"`; no `eval`/`new Function`/string-form timers on user input.
+  **Each of these front-end controls carries a test** (guide 04, rule 6) — a control with no
+  test is not in force.
 - Update the security register in the same change set with `file:line`.
 
 ## 2.7 Documentation Fidelity & Rollup  *(guide 00, 06)*  — adopt as-is

@@ -54,6 +54,16 @@ every future change riskier.
    verified rather than assumed; library calls match the locked version's real API, not
    one from memory. A hallucinated symbol must fail the build, so the build has to run.
    Any claim about existing behaviour cites `file:line` (code is the source of truth).
+8. **Config is managed, not just secrets.** Non-secret config is typed and **validated at
+   startup** (fail fast on a missing/invalid value), env-divergent values live in one
+   declared place, and **feature flags carry an owner and a removal date** — a permanent
+   flag is tech debt and a hidden code path. Config-not-code is the leading cause of
+   "works in staging, breaks in prod."
+9. **A human reads the diff — even solo.** Before merging any change to shared code, auth,
+   or data, a human actually reads the diff; the assistant's self-review
+   (`templates/code-review.md`) is an *input* to that, never a substitute. The maker never
+   certifies its own work (base spine) — "the AI wrote it and the AI approved it" is not a
+   review.
 
 ---
 
@@ -87,6 +97,10 @@ Cheap, mostly mechanical checks:
 - **Reuse check:** a newly added function was preceded by a search for an existing
   equivalent, and doesn't re-derive a process that already lives elsewhere (the same
   failure as recomputing in the frontend a value the engine already produces).
+- **Config check:** non-secret config is typed and validated at startup; every feature
+  flag has an owner + removal date; no stale flags linger.
+- **Human-read-the-diff:** a shared-code / auth / data-migration change shows a human
+  reviewed the diff — the assistant's self-review is not the approval.
 
 ---
 
@@ -97,5 +111,7 @@ Cheap, mostly mechanical checks:
 - [ ] Establish default-deny as the authorization default from the first endpoint.
 - [ ] Add the secret-grep and layer-check to your pre-merge routine.
 - [ ] Adopt the code-quality self-review — run `templates/code-review.md` on the diff (hallucination + bloat + correctness) before requesting review.
+- [ ] Manage config like code: typed + startup-validated; give every feature flag an owner + removal date.
+- [ ] Require a human to read the diff before merge on shared-code / auth / data changes — even solo.
 
 > Next guide: **04 — QA & Testing.**

@@ -122,6 +122,29 @@ for t in story.md design-decision.md code-review.md change-checklist.md; do
   else bad "templates/$t missing"; fi
 done
 
+# --- Gate 8: story close-out — shipped stories cite resolvable code refs -----
+echo "[8] Close-out — shipped/implemented stories cite resolvable code references"
+# Catches the "AI said it was done, but the ticket never matched the code" failure:
+# a story in a terminal build status must point at file:symbol that actually exist.
+root="$(in_git && git rev-parse --show-toplevel 2>/dev/null || echo .)"
+story_files=$(grep -rilE '^status:[[:space:]]*(implemented|partially-shipped|shipped)' \
+              $SPEC_PATHS --include='*.md' 2>/dev/null || true)
+if [ -z "$story_files" ]; then skip "no shipped/implemented story files found"
+else
+  miss=""
+  for sf in $story_files; do
+    # code references look like `path/to/file.ext::symbol` or `path/to/file.ext:line`
+    refs=$(grep -oE '`[A-Za-z0-9_./-]+\.[A-Za-z0-9]+(::|:)[A-Za-z0-9_]+`' "$sf" 2>/dev/null \
+            | tr -d '`' | sed -E 's/(::|:)[A-Za-z0-9_]+$//' | sort -u || true)
+    for r in $refs; do
+      [ -e "$root/$r" ] || [ -e "$r" ] || miss="$miss
+        $sf -> missing code ref: $r"
+    done
+  done
+  if [ -z "$miss" ]; then ok "shipped stories' code references resolve to real files"
+  else bad "shipped story cites code that doesn't exist (stale close-out):"; printf '%s\n' "$miss"; fi
+fi
+
 echo
 echo "== summary: $PASS passed, $FAIL failed, $SKIP skipped =="
 [ "$FAIL" -eq 0 ] && { grn "All gates green."; exit 0; } || { red "Gates failed — fix before merge."; exit 1; }

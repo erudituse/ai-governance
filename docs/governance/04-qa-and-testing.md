@@ -11,7 +11,8 @@
 
 > **Testing is first-class at every step:** a green baseline before and after each
 > change, a test for every new behaviour, gold-masters for numeric outputs, and a consistency
-> test for any value shown in more than one place.
+> test for any value shown in more than one place — and **front-end behaviour (render, user
+> flows, security, and accessibility) is tested, not just the backend.**
 
 ---
 
@@ -44,6 +45,26 @@ quietly.
    *extends* that test before it merges.
 5. **Test traceability.** Keep a summary register of runs — before/after counts, scope,
    the story, and any flaky tests quarantined.
+6. **Front-end behaviour is tested, not just the backend.** Numeric gold-masters and
+   cross-surface consistency cover the values; the UI that renders them needs its own
+   coverage. The "frontend renders, never re-derives" rule (guide 03) is only credible if
+   the rendering is tested:
+   - **Component / unit tests** for render and state logic — conditional display, error /
+     empty / loading states, client-side validation.
+   - **End-to-end (browser) tests** for every critical user flow — the actual click-through,
+     not just the API beneath it.
+   - **A test for each front-end security control** (`CLAUDE.md` §2.6): user content renders
+     safely (never as raw HTML / no XSS), the URL-scheme allowlist holds, and
+     `target="_blank"` carries `rel="noopener noreferrer"`. A security control with no test
+     rots silently.
+   - **Visual-regression** snapshots on key views, and **cross-browser / responsive** checks
+     across the browsers and breakpoints you support.
+   - **Accessibility (a11y)** is a *baseline* check on key views — an automated axe-style
+     scan at minimum — not an afterthought.
+
+   *Tool choice is per-stack* — pick what fits and record it in your validated stack list
+   (`CLAUDE.md` §2.1). These tests run in your project's CI suite, **not** in the governance
+   gates (`checks/`), which are greppable-only by design.
 
 ---
 
@@ -71,6 +92,12 @@ pipeline and asserts every multi-surface dollar value matches. The rule generali
 - **Gold-master check:** a calculation change either leaves outputs identical or carries a
   documented, intended diff — never an unexplained one.
 - **Boundary fixtures:** new input handling is tested at min, max, off-by-one, oversized.
+- **Front-end coverage:** every critical user flow has an E2E test; render/state logic has
+  component tests; each §2.6 front-end security control has a test; key views carry
+  visual-regression snapshots and pass an automated a11y scan. A flow or a security control
+  with no front-end test blocks review.
+- **Cross-browser / responsive:** key views are checked on the supported browsers and
+  breakpoints, not just one dev machine.
 
 ---
 
@@ -78,6 +105,10 @@ pipeline and asserts every multi-surface dollar value matches. The rule generali
 
 - [ ] Stand up the test harnesses **early** — both backend and frontend. (The frontend
       harness is the most commonly skipped, and the most commonly regretted.)
+- [ ] Cover the front end (rule 6): component + E2E per critical flow, a test per §2.6
+      security control, visual-regression on key views, cross-browser/responsive, and an
+      automated accessibility scan. Pick the tools per your stack (record them in §2.1);
+      they run in your CI suite, not the governance gates.
 - [ ] Adopt "before: X, after: X+N" as the reporting format for every change.
 - [ ] Build the cross-surface consistency test as soon as a value appears twice.
 - [ ] Author test cases in the story at spec time, not after coding — see the *Test cases* section of `templates/story.md`.

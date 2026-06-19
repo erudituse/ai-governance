@@ -48,9 +48,16 @@ backup nobody has *restored* is not a backup — it's a hope.
    a database's firewall staying closed, TLS required) abort the deploy if violated —
    and are *never* weakened, in any environment, for any reason.
 7. **Day-2: classify, watch, drill.** Incidents have pre-agreed severities and a
-   response procedure; alerts cover the controls whose silent failure hurts most;
-   backups are tested by an actual restore drill; a monthly pass re-checks deferred
-   CVEs, rotations, and infra invariants.
+   response procedure; alerts cover the controls whose silent failure hurts most **and
+   user-facing health — error rate, latency, saturation — with "unhealthy" defined
+   numerically before go-live** (a deploy can keep every security invariant intact and
+   still serve 500s); backups are tested by an actual restore drill; a monthly pass
+   re-checks deferred CVEs, rotations, and infra invariants.
+8. **Every alert has a runbook and an owner.** An alert links to a runbook (symptom →
+   checks → mitigation → who to escalate to) and reaches a named on-call who actually
+   receives it; an alert with neither is noise, and a pager firing into the void at 3am is
+   not monitoring. (This is *operational* incident response — distinct from the AI-incident
+   severities in `CLAUDE.md` §11.)
 
 ---
 
@@ -80,6 +87,8 @@ standing re-audit habit, not luck.
   explicit accepted-risk entry.
 - **Trigger honoured:** a change in a re-audit trigger class has a matching audit-doc
   update in the same change set.
+- **Alert actionability:** a sampled alert links to a runbook and a named escalation owner;
+  user-facing health alerts (error rate / latency / saturation) exist, not only control alerts.
 
 ---
 
@@ -90,5 +99,6 @@ standing re-audit habit, not luck.
 - [ ] Require a `Rollback:` line on non-trivial commits.
 - [ ] Encode security-critical infra invariants as deploy-aborting checks — never as docs alone.
 - [ ] Define incident severities, alerts on the controls that matter, and a restore-drill cadence *before* go-live.
+- [ ] Add user-facing health alerts (error rate / latency / saturation) with numeric thresholds, and give every alert a runbook + on-call owner.
 
 > Next guide: **06 — Security, Privacy & Compliance.**

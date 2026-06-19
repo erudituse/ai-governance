@@ -41,6 +41,12 @@ has a target) · `not-scheduled` (no owner / date) · `aspirational` (a bigger b
 documented not planned) · `superseded` (moved elsewhere — point to the new home) ·
 `cancelled` (need rejected; record the date + decision).
 
+**History vs working set.** Terminal statuses (`shipped`, `cancelled`, `superseded`)
+*close* a story: it leaves the live backlog but stays in the record — its ID is permanent.
+The working set is only `proposed` / `planned` / `partially-shipped`. **Archive by status,
+never by deletion; never renumber or reuse a counter.** This is how the backlog stays lean
+without losing history (guide 01, rule 6).
+
 ---
 
 ## The skeleton
@@ -105,3 +111,10 @@ For any story marked `implemented`, `partially-shipped`, or `shipped`:
    location is removed, not paraphrased.
 4. If the implementation diverges from the spec, the story documents the divergence — it
    does not paper over it.
+5. A change to already-shipped behaviour **amends this story** (or opens a new story that
+   links back and flips this one to `superseded` / `partially-shipped` with a pointer) — it
+   never silently forks into a fresh ticket that leaves this one stale.
+6. **"Done" is verified against the code, not asserted.** If the AC → test → `file:line`
+   links don't resolve, the story is *not* closed — regardless of any assistant's report
+   that it is. The maker (human or AI) never certifies its own close-out; a reviewer or a
+   gate confirms the links resolve.

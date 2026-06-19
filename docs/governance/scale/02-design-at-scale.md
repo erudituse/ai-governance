@@ -51,6 +51,11 @@ design control."
    re-litigated (a later reversal supersedes it with a new dated ADR).
 5. **The AI proposes, a human ratifies.** An AI-drafted design is a *proposal*; a named
    human reviews the blast radius and approves before it becomes the decision of record.
+6. **Security-relevant designs are threat-modeled.** A design touching data flows, trust
+   boundaries, authn/authz, or sensitive data carries a threat model (extends the base
+   guide's threat sketch) — reviewed like any ADR, with unresolved risk routed to the risk
+   register. Frameworks expect risk assessed *during* design (PCI 6.3/6.5; ISO A.8.27),
+   not only found by a pentest after build (guide 09).
 
 ---
 
@@ -77,6 +82,8 @@ notice period, and the ADR for any cross-team contract required a second approve
   notification path.
 - **No re-litigation:** a reversed decision points to a superseding dated ADR, not a
   silent flip.
+- **Threat model present:** a security-relevant design has a reviewed threat model, with any
+  unresolved risk recorded in the risk register.
 
 ---
 
@@ -87,5 +94,6 @@ notice period, and the ADR for any cross-team contract required a second approve
 - [ ] Extend the blast-radius field to name downstream **teams** + notification path.
 - [ ] Name the design authority that resolves cross-team contract disputes.
 - [ ] Adopt deprecate-before-remove as the only path for breaking a consumed contract.
+- [ ] Threat-model security-relevant designs at ADR time; route unresolved risk to the risk register.
 
 > Next guide: **03 — Coding at scale.**

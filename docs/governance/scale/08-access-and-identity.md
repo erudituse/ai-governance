@@ -52,7 +52,13 @@ PCI care because it defeats everything else.
    compromise (base coding rule); separate credentials per environment.
 6. **The AI's access is an identity too.** An AI assistant's repo/tool/data access is
    scoped to least privilege, attributable, reviewed in the same cadence, and revoked like
-   any other. It never holds standing production or data access beyond its task.
+   any other. It never holds standing production or data access beyond its task. **Its
+   actions (tool-calls, commands, authored diffs) are logged under that identity and
+   reviewed in the log cadence (guide 13)** — auditable like any privileged service account.
+7. **Production is access-segregated from non-prod.** Developers hold **no standing
+   production access**; prod data/config changes go through the privileged, second-actor
+   path (rule 4, guide 06). Dev/test and production are separated environments — a distinct
+   SOX/PCI 6.5.3/ISO A.8.31 control from the test-data isolation in guide 04.
 
 ---
 
@@ -80,6 +86,8 @@ owner-attested reviews, and least-privilege service accounts.
 - **Privileged inventory:** admin/prod access is enumerated, MFA-enforced, and minimal.
 - **No ghosts:** no enabled account lacks a current owner and business reason; no shared
   logins.
+- **Prod segregation:** no developer holds standing production access; prod changes go via
+  the second-actor path; the AI assistant's actions appear in the log review.
 
 ---
 
@@ -89,6 +97,7 @@ owner-attested reviews, and least-privilege service accounts.
 - [ ] Adopt `templates/access-review.md`; schedule the first periodic review now.
 - [ ] Enforce SSO + MFA, unique accounts, per-environment credentials, scheduled rotation.
 - [ ] Inventory and minimize privileged access; require a second actor for privileged change.
-- [ ] Scope and register the AI assistant's access as an identity under the same rules.
+- [ ] Scope and register the AI assistant's access as an identity under the same rules; log + review its actions.
+- [ ] Segregate production access from non-prod — no standing developer prod access; prod changes via the second-actor path.
 
 > Next guide: **09 — Vulnerability Management.**

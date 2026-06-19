@@ -42,6 +42,14 @@ it without knowing why it was made.
    rationale*.
 4. **Pure re-presentation may skip the design update** — but say so explicitly, so the
    skip is a decision, not an omission.
+5. **Design observability in.** A feature's design names the signals it must emit — key
+   events, error conditions, and at least one health metric — so its *silent* failure is
+   detectable. *"How would we know this broke in production?"* is a design-time question,
+   not a day-2 afterthought; you cannot alert (guide 05) on what was never instrumented.
+6. **Threat-sketch a trust-boundary change.** Any feature crossing a trust boundary — a
+   new actor, a new external input, a new privilege — gets a one-paragraph threat sketch
+   (*who could abuse this, and what stops them*) **before** the input-form checklist
+   (guide 06) is applied. Pentests find flaws after build; this finds them before.
 
 ---
 
@@ -72,6 +80,10 @@ The control is a review gate, cheap to apply:
   entry in the design doc.
 - **Decomposition smell test:** if the author can't name the blast radius in a sentence
   or two, send it back to be split — don't approve on faith.
+- **Observability check:** a feature merges with its emitted signals named (events, error
+  conditions, one health metric) — silent failure must be detectable.
+- **Threat-sketch check:** a trust-boundary change carries its one-paragraph abuse +
+  mitigation sketch; absence blocks review.
 
 ---
 
@@ -81,5 +93,6 @@ The control is a review gate, cheap to apply:
 - [ ] Make "list the downstream consumers" a required field for any shared-code change.
 - [ ] Adopt the rule: *un-articulable blast radius ⇒ decompose.*
 - [ ] Define what counts as "pure re-presentation" (the only exemption from a design entry).
+- [ ] Make "name the signals this emits" and (for trust-boundary changes) a one-paragraph threat sketch required design-time fields.
 
 > Next guide: **03 — Coding.**

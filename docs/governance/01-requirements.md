@@ -52,6 +52,25 @@ Adopt these verbatim. They are ordered; do not start in the middle.
    green-lights *the direction* — never a licence to skip the spec.
 5. **A discovered gap sends you back to the spec.** If implementation reveals the spec
    missed something, amend the spec first, then continue coding.
+6. **Consolidate, don't accumulate — stories are history, requirements are current
+   truth.** The story log is append-only: you *close* a story by status (`shipped`,
+   `cancelled`, `superseded` with a pointer to its successor), never by deleting or
+   renumbering it. The engineering source-of-truth is the opposite — it states *current*
+   behaviour and is rewritten in place, so two contradictory "live" specs never coexist.
+   A superseded need flips the origin story's status and is folded into the requirement,
+   not stacked as a second active story. History survives in the IDs + status; the working
+   set (`proposed` / `planned` / `partially-shipped`) stays lean enough to actually read.
+7. **Close the loop on the *origin* story — truthfully, against the code.** When work
+   ships, the story that defined it is updated to match *what was actually built*: every
+   acceptance criterion annotated with its real test / `file:line` (or `(no automated
+   coverage)`), every divergence from the spec recorded **in that story**, status moved to
+   reflect reality. A follow-on change either amends the origin story or opens a new one
+   that **links back and flips the origin's status** — never a silent new ticket that
+   leaves the original stale. "Done" is true only when the acceptance-criteria → test →
+   code links resolve. An assistant reporting "doc updated" or "built to spec" is making a
+   *maker's claim, not evidence* — the maker never certifies its own work — so verify it
+   against the code before trusting it, or the next reader (you, weeks later) re-derives
+   intent by hunting through the source.
 
 ---
 
@@ -85,6 +104,11 @@ but it's cheap and mechanical:
 - **Criteria-to-test audit:** any story marked done must have every acceptance
   criterion map to a real test — or be explicitly tagged "(no automated coverage)" so
   the gap is visible, not silent.
+- **Close-out check:** a story marked `implemented` / `shipped` must *resolve* — its
+  `Code references` point to `file:symbol` that actually exist, and each acceptance
+  criterion carries a test link or an explicit no-coverage tag. A shipped story whose code
+  references don't resolve is a stale close-out — caught here at review, not by
+  code-archaeology weeks later. (Mechanised as a gate in `checks/`.)
 
 If your tooling supports it, make the diff check a pre-commit or PR gate. The gate is
 what stops the rule from eroding the first time a change "feels too small to bother."
@@ -100,6 +124,8 @@ A 60-second port. Tick each box on day one:
 - [ ] Establish the rule in writing: *documentation is the first action; approval ≠ skip the spec.*
 - [ ] Add the change-set review check: source touched ⇒ spec touched.
 - [ ] Decide where tests are derived from criteria, and when (answer: at spec time).
+- [ ] Adopt the consolidate-don't-accumulate rule: close stories by status (never delete/renumber); keep requirements as current truth, rewritten in place.
+- [ ] Adopt the close-out rule: on ship, update the *origin* story to match the code (AC ↔ test ↔ `file:line`), record divergences, link follow-ons back — and verify "done" against code, never on the assistant's word.
 
 > Next guide: **02 — Design.** Once *what* is specified, design assesses *blast radius*
 > and records the decision before a line is built.

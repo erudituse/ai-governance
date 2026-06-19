@@ -54,6 +54,11 @@ personal-data exposure (and a PCI/SOC 2/privacy finding) the instant it happens.
 6. **Release-readiness is an owned decision.** A named role confirms the readiness criteria
    (suite green, criteria met, docs in sync, rollback ready) before promotion — readiness
    is a recorded decision, not a vibe.
+7. **The front-end suite runs in the shared gate too.** The base rule's front-end coverage
+   (E2E per critical flow, a test per §2.6 security control, visual-regression, accessibility
+   — base rule 6) runs in *shared CI*, not just on a dev machine; flaky E2E tests are
+   quarantined-with-owner like any other. A documented browser/breakpoint matrix defines
+   what "supported" means, so "works on my machine" never stands in for it.
 
 ---
 
@@ -84,7 +89,8 @@ test data with a provenance gate, and flaky tests quarantined-with-owner, never 
 
 ## Adopt on a new project
 
-- [ ] Stand up shared CI as the merge gate (backend **and** frontend harness) early.
+- [ ] Stand up shared CI as the merge gate (backend **and** frontend harness) early —
+      including E2E per critical flow and an a11y scan; define the supported browser/breakpoint matrix.
 - [ ] Write the test-data policy: synthetic-only below prod + a provenance gate.
 - [ ] Define and isolate environments and which data class each may hold.
 - [ ] Adopt quarantine-with-owner for flaky tests; forbid silent skips.

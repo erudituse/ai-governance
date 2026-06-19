@@ -42,30 +42,40 @@ risks that end products, not just embarrass them.
    inline and in the register; re-check ignored findings monthly. Never ignore a
    reachable CVE "until later"; never lower the scan threshold to hide a finding.
 4. **Defence in depth.** Edge controls *and* in-app guards — both required.
+5. **Object-level authorization (no IDOR).** Every endpoint that returns or mutates a
+   record verifies the caller is authorized for *that specific object* — not merely
+   authenticated, and not merely allowed the route. Input validation stops injection; it
+   does nothing against "user A reads user B's record by changing an ID." Authorization is
+   **tested with a cross-user / cross-tenant negative test**, never assumed. (Broken access
+   control is OWASP's #1.)
+6. **Log security events.** Auth failures, authz denials, privilege/role changes, and
+   secret access are logged with an actor identifier and an outcome — the audit trail a
+   breach investigation needs — *while still never logging payloads* (rule 8). "Never log
+   PII" means redact content, not record nothing.
 
 ---
 
 ## The rule(s) — Privacy
 
-5. **Classify first.** Identify data sensitivity (a public→secret ladder) *before*
+7. **Classify first.** Identify data sensitivity (a public→secret ladder) *before*
    designing storage or logging. The most sensitive classes never leave the system.
-6. **Never log personal data.** Logs hold hashes/identifiers, not payloads.
-7. **Encrypt sensitive data at rest** — including derived artifacts — with the key in a
+8. **Never log personal data.** Logs hold hashes/identifiers, not payloads.
+9. **Encrypt sensitive data at rest** — including derived artifacts — with the key in a
    secrets manager; drop plaintext; aim for breach-unlinkability.
-8. **Data-subject affordances.** Export and delete must exist.
-9. **A standing privacy register** — mirroring the security one — updated whenever
-   personal-data handling changes.
+10. **Data-subject affordances.** Export and delete must exist.
+11. **A standing privacy register** — mirroring the security one — updated whenever
+    personal-data handling changes.
 
 ---
 
 ## The rule(s) — Compliance
 
-10. **Map to named frameworks** (information-security, AI-risk, privacy, and
+12. **Map to named frameworks** (information-security, AI-risk, privacy, and
     application-security standards appropriate to the domain).
-11. **Evidence, not just mapping.** Each material control points to a *live artifact* —
+13. **Evidence, not just mapping.** Each material control points to a *live artifact* —
     an audit row, a test, a deploy gate, a log — because compliance held only "by
     reference" is the gap.
-12. **Human-in-the-loop on consequential outputs.** Financial / legal / safety outputs
+14. **Human-in-the-loop on consequential outputs.** Financial / legal / safety outputs
     require documented review and a **named accountable human**. "The system decided"
     is never a justification.
 
@@ -95,6 +105,10 @@ how the lesson outlives the person who learned it.
   endpoint, a dependency, or an integration has a matching register update in the same diff.
 - **Injection test:** a new form's schema test rejects a script payload and an oversized
   string at the API boundary.
+- **Authz negative test:** a record-bearing endpoint has a test proving a caller *cannot*
+  read or mutate another user's / tenant's object (no IDOR).
+- **Security-event log check:** auth failures, authz denials, privilege changes, and secret
+  access are logged with actor + outcome — and carry no payloads.
 - **Ignore hygiene:** each suppressed CVE has an inline id + reason and a register row,
   re-checked monthly.
 - **No-PII-in-logs grep:** logging call sites reference hashes/identifiers, not raw
@@ -108,6 +122,7 @@ how the lesson outlives the person who learned it.
 
 - [ ] Create the security register and the privacy register on day one; mark gaps OPEN.
 - [ ] Adopt the input-form checklist as non-optional for every new form/endpoint.
+- [ ] Add object-level authz (IDOR) negative tests for record-bearing endpoints, and log security events (actor + outcome) without payloads.
 - [ ] Wire dependency + container scans as blocking gates with the documented CVE protocol.
 - [ ] Define the data-classification ladder and the "never log PII / encrypt at rest" rules before the first data feature.
 - [ ] Map to the frameworks your domain requires — and attach evidence, not just the mapping.

@@ -83,7 +83,8 @@ the [team] ones via compensating controls (S2-05).
 | S4-02 | **Joiner/Mover/Leaver**: grant on join, *remove old-role access on move*, **revoke within the defined SLA on exit**. |
 | S4-03 | **Periodic access reviews** on a fixed cadence, owner-attested and recorded; access without a current business reason is removed. |
 | S4-04 | **Privileged access** (admin/prod/keys) is minimised, MFA-enforced, logged, and requires a second actor for privileged change (S2). |
-| S4-05 | SSO + MFA; unique attributable accounts (no shared logins); per-environment credentials; scheduled rotation. **The AI assistant's access is an identity** — scoped, attributable, reviewed, and revoked like any other. |
+| S4-05 | SSO + MFA; unique attributable accounts (no shared logins); per-environment credentials; scheduled rotation. **The AI assistant's access is an identity** — scoped, attributable, reviewed, and revoked like any other; **its actions (tool-calls, commands, authored diffs) are logged under that identity** and included in the log-review cadence (S9-06), auditable like any privileged service account. |
+| S4-06 | **Production is access-segregated from non-prod** — no standing developer access to production; prod data/config changes go through the privileged, second-actor path (S4-04, S2). Dev/test and prod are separated environments. |
 
 ## S5. Vulnerability Management *(guide 09)* — [audit]
 
@@ -103,6 +104,8 @@ the [team] ones via compensating controls (S2-05).
 | S6-03 | A written **BCP/DR plan**, *exercised* (drill/tabletop) on a cadence. |
 | S6-04 | **Monitoring & alerting** on availability and on the controls whose silent failure hurts most (infra invariants, backup success, expiry); alerts reach an on-call that receives them. |
 | S6-05 | Carried resilience gaps are **named and explicitly accepted** by an owner — never silently held. |
+| S6-06 | **Incident & breach management**: a documented plan with severities (base §11), named roles, a **breach-notification owner + legal timelines** (e.g. GDPR 72h), a **post-incident review (RCA) for every P1/P2**, and an **incident register** that feeds the risk register; the plan is **tested on a cadence**. |
+| S6-07 | **Capacity & performance**: scaling limits are known per system, capacity/saturation is **alerted before exhaustion**, and performance/load is tested before significant change. |
 
 ## S7. Data Lifecycle & Cryptography *(guide 11)* — [audit]
 
@@ -171,7 +174,8 @@ Re-scope triggers   : <new data class · new regulation · first paying/enterpri
 - JML flow owner + leaver-revocation SLA: `<owner / ≤ 24h?>`
 - Access-review cadence: `<quarterly?>` (record: `templates/access-review.md` → `<where>`)
 - Privileged-access inventory + MFA: `<where / enforced?>`
-- AI assistant access scope + registered identity: `<scope>`
+- Prod/non-prod access segregation: `<no standing dev prod access? prod-change path>`
+- AI assistant access scope + registered identity + action logging: `<scope / where logged>`
 
 ## P-S5 Vulnerability management *(S5)*
 - Scan gates + thresholds: `<tools / thresholds>`
@@ -182,7 +186,9 @@ Re-scope triggers   : <new data class · new regulation · first paying/enterpri
 ## P-S6 Resilience *(S6)*
 - RTO/RPO per system: `<system → RTO / RPO>` (plan: `templates/bcp-dr-plan.md` → `<where>`)
 - Restore-drill cadence + DR exercise cadence: `<…>`
-- Alerting (availability + control-failure + expiry) → on-call: `<where / who>`
+- Alerting (availability + user-facing health + control-failure + expiry) → on-call: `<where / who>`
+- Capacity management: `<scaling limits per system / saturation alerts / load-test before change>`
+- Incident-response plan + breach-notification owner + PIR/RCA cadence: `<where / owner / tested when>`
 
 ## P-S7 Data lifecycle & crypto *(S7)*
 - Data-classification ladder + retention/disposal schedule: `<where>`

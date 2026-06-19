@@ -50,6 +50,7 @@ gap). Keep the Evidence column current — it is what gets sampled.
 | Emergency / break-glass w/ retroactive review | S-07 | Change Mgmt | CC8 | 6.5.1 | A.8.32 | break-glass log + reviews |
 | Enforced (non-bypassable) gates; retained evidence | S-07 | Change Mgmt | CC8 | 6.5.2 | A.8.32 | CI required-checks + retained results |
 | Reversible / multi-deploy steps; rollback line | B-05, S-05 | Change Mgmt | CC8 | 6.5.4 | A.8.32 | release records |
+| Threat-model security-relevant designs | B-02, S-02 | SDLC | CC3, CC8 | 6.3 | A.8.27 | threat models + risk register |
 
 ## C · Coding & segregation of duties
 
@@ -62,6 +63,7 @@ gap). Keep the Evidence column current — it is what gets sampled.
 | Maker ≠ checker; AI is maker never checker | S-06 | **SoD** | CC8 | 6.5.1 | A.5.3, A.8.32 | provenance (authored/reviewed/released) |
 | AI authorship disclosed; named human accountable | S-03, S-06 | SoD | CC1, CC8 | 6.5.1 | A.5.3 | AI-disclosure trailer + attestation |
 | Self-review quality lens (hallucination/bloat) | B-03 | SDLC | PI1 | 6.5.1 | A.8.28 | `templates/code-review.md` |
+| Object-level authorization (no IDOR); authz tested | B-06 | SDLC | CC6.1, CC8 | 6.2.4 | A.8.26 | authz cross-user negative tests |
 
 ## D · QA, testing & processing integrity
 
@@ -84,6 +86,8 @@ gap). Keep the Evidence column current — it is what gets sampled.
 | Privileged access minimized; MFA; second actor | S-08, S-06 | Logical Access, SoD | CC6.1 | 7.2, 8.4, 8.5 | A.8.2, A.8.5 | privileged-access inventory |
 | SSO+MFA; unique accounts; per-env creds; rotation | S-08, B-03 | Logical Access | CC6.1, CC6.6 | 8.2, 8.3, 8.6 | A.5.16, A.5.17 | IdP config + rotation log |
 | AI assistant access scoped & reviewed as identity | S-08 | Logical Access | CC6.1 | 7.2 | A.5.15 | AI access entry in review |
+| AI assistant actions logged under its identity | S-08, S-13 | Logical Access | CC6.1, CC7.2 | 10.2 | A.8.15, A.8.16 | AI action logs in log review |
+| Production access segregated from non-prod | S-08, S-04 | Logical Access, SoD | CC6.1 | 6.5.3 | A.8.31 | no standing dev prod access; second-actor path |
 
 ## F · Operations, vuln mgmt & resilience
 
@@ -98,6 +102,8 @@ gap). Keep the Evidence column current — it is what gets sampled.
 | Monitoring & alerting on critical controls | S-10 | Computer Ops | CC7.2, A1.1 | 10.7 | A.8.16 | alert config |
 | Infra invariants abort deploy | B-05, S-05 | Change Mgmt | CC6.6, CC8 | 1.2, 4.2 | A.8.20, A.8.9 | deploy-gate checks |
 | Residual risk named + accepted by owner | S-10, B-05 | — | CC3 | 12.3 | Clause 6.1 | accepted-risk register |
+| Capacity & performance management | S-10 | Computer Ops | A1.1 | — | A.8.6 | capacity alerts + load-test results |
+| Incident response plan + PIR/RCA; breach notification; tested | S-10, B-00 | Computer Ops | CC7.3, CC7.4, CC7.5 | 12.10 | A.5.24–A.5.28 | incident register + PIR records + drill |
 
 ## G · Data, crypto & privacy
 
@@ -118,6 +124,7 @@ gap). Keep the Evidence column current — it is what gets sampled.
 |---|---|---|---|---|---|---|
 | Audit-log fields/retention/tamper-evidence/NTP | B-00 spine, S-13 | Computer Ops | CC7.2 | 10.2–10.6 | A.8.15, A.8.17 | log config + retention policy |
 | Log-review cadence (recorded reviewer) | S-13 | Computer Ops | CC7.2 | 10.4 | A.8.15 | log-review records |
+| Security-event logging (auth/authz/privilege/secret access) | B-06, S-13 | Computer Ops | CC7.2 | 10.2 | A.8.15, A.8.16 | security-event logs |
 | Security-awareness training (tracked) | S-12 | — | CC1.4 | 12.6 | A.6.3 | training roster |
 | Acceptable-use attestation | S-12 | — | CC1.1 | 12.6 | A.5.10, A.6.2 | signed attestations |
 | Onboarding/offboarding controlled | S-12, S-08 | Logical Access | CC1.4, CC6.2 | 8.2 | A.6.1, A.6.5 | JML checklists |

@@ -55,9 +55,32 @@ docs/governance/
 2. Read [`docs/governance/00-operating-model.md`](docs/governance/00-operating-model.md)
    first — it explains *why* the rest takes the shape it does.
 3. Work through each guide's **Adopt on a new project** checklist; adopt the `templates/`.
-4. Wire in the gates ([`docs/governance/checks/`](docs/governance/checks/)). If either
-   switch is elevated, also adopt [`docs/governance/scale/`](docs/governance/scale/) and
-   add `@docs/governance/scale/CLAUDE.md` to your root `CLAUDE.md`.
+4. Wire in the gates (see **Running the gates** below). If either switch is elevated, also
+   adopt [`docs/governance/scale/`](docs/governance/scale/) and add
+   `@docs/governance/scale/CLAUDE.md` to your root `CLAUDE.md`.
+
+## Running the gates
+
+The `checks/` scripts mechanise each guide's "How to verify" — a rule without a gate rots.
+They are **read-only** (they never modify your repo) and **opt-in** (nothing auto-installs).
+
+```bash
+# 1. edit the CONFIG block at the top of the script for your project
+#    (PROJECT_TERMS, SOURCE_EXTS, SPEC_PATHS, SECRET_REGEX, PII_FIELDS)
+
+# 2. run it anytime — exit 0 = all green, non-zero = a gate failed (and prints why)
+bash docs/governance/checks/governance-checks.sh
+
+# 3. (optional) block bad commits — install the sample pre-commit hook
+cp docs/governance/checks/pre-commit.sample .git/hooks/pre-commit
+chmod +x .git/hooks/pre-commit
+```
+
+At the **audit tier**, also run `docs/governance/scale/checks/assurance-checks.sh` as a
+**required CI status check the author cannot bypass** — a bypassable gate is, to an
+auditor, no control. Full configuration and per-gate detail:
+[`docs/governance/checks/README.md`](docs/governance/checks/README.md) and
+[`docs/governance/scale/checks/README.md`](docs/governance/scale/checks/README.md).
 
 ## Disclaimer
 
@@ -72,5 +95,4 @@ without warranty of any kind (see `LICENSE`).
 ## License
 
 Licensed under the **Apache License, Version 2.0** — see [`LICENSE`](LICENSE) and
-[`NOTICE`](NOTICE). (If the `LICENSE` file is absent, add the Apache-2.0 text via your
-forge's license picker.)
+[`NOTICE`](NOTICE).
