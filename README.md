@@ -33,7 +33,11 @@ audit** → the full set.
 ## Repository layout
 
 ```
-CLAUDE.md / LICENSE / NOTICE        ← (CLAUDE.md is copied to an adopting repo's root)
+install.js                          one-command installer — `node install.js` copies the kit into your repo
+LICENSE / NOTICE
+.claude/
+├── settings.json                   wires the agent-side governance hooks
+└── hooks/                          SessionStart checklist · requirements-first gate · git push/commit gate
 docs/governance/
 ├── CLAUDE.md                       the policy: Part 1 (org spine) + Part 2 (project fill-in)
 ├── 00–07 *.md                      one guide per SDLC phase
@@ -49,36 +53,95 @@ docs/governance/
 
 ## How to adopt it on your project
 
-1. Copy [`docs/governance/`](docs/governance/) into your repo and drop its `CLAUDE.md` in
-   as your repository's **root** `CLAUDE.md`. Fill in Part 2 for your project, and set the
-   two switches in § 2.1.
-2. Read [`docs/governance/00-operating-model.md`](docs/governance/00-operating-model.md)
-   first — it explains *why* the rest takes the shape it does.
-3. Work through each guide's **Adopt on a new project** checklist; adopt the `templates/`.
-4. Wire in the gates (see **Running the gates** below). If either switch is elevated, also
-   adopt [`docs/governance/scale/`](docs/governance/scale/) and add
+> This repo is a **template you copy *from*** — not a project you build *in*. You drop its
+> governance files into **your** repository, then code there with Claude Code.
+
+### Quick install — one command, any OS
+
+Download this kit (clone or "Download ZIP"). Then, from inside **your** project directory,
+run the installer. Node ships with Claude Code, so it's already on your machine — the same
+command works on Windows, macOS, and Linux:
+
+```
+node /path/to/this-kit/install.js
+```
+
+It copies the governance files into your repo, drops the root `CLAUDE.md`, and adds the
+`.gitignore` lines — and it **never overwrites an existing root `CLAUDE.md`** (that holds
+your Part 2). Re-running it is safe. Then do **Then (either path)** below.
+
+### Manual install — if you'd rather copy by hand
+
+Copy these from the kit into your repository, keeping the same paths (use your file manager
+or whatever copy command your OS has):
+
+| From (this kit) | To (your repo) | What it is |
+|---|---|---|
+| `docs/governance/` | `docs/governance/` | guides, templates, checks |
+| `.claude/settings.json` and `.claude/hooks/` | same paths | the agent-side governance hooks |
+| `docs/governance/CLAUDE.md` | `CLAUDE.md` at your repo **root** | the policy — **skip this if you already have a root `CLAUDE.md`**; merge by hand instead |
+
+Then add these lines to your `.gitignore` (so the hooks ship but local state doesn't):
+
+```
+.claude/settings.local.json
+.claude/*.lock
+.claude/projects/
+.claude/plans/
+.claude/todos/
+.claude/shell-snapshots/
+```
+
+### Then (either path)
+
+1. **Fill in Part 2 of `CLAUDE.md`** — project name, tech stack, and the two switches in
+   § 2.1. If either switch is elevated, also copy
+   [`docs/governance/scale/`](docs/governance/scale/) and add
    `@docs/governance/scale/CLAUDE.md` to your root `CLAUDE.md`.
+2. **Read [`docs/governance/00-operating-model.md`](docs/governance/00-operating-model.md)**
+   first — it explains *why* the rest takes the shape it does — then each guide's
+   **Adopt on a new project** checklist.
+3. **Open Claude Code in your repo and start coding.** The hooks load automatically: a
+   governance checklist is injected each session, source edits are blocked until a story
+   exists, and `git push` / spec-less commits ask for confirmation.
+4. **(Optional)** Wire the CI gates — see **Running the gates** below.
+
+> **The hooks need `bash` + `jq`.** Native on macOS/Linux; on Windows use Git Bash or WSL.
+> If `jq` is missing the hooks fail **open** (safe — your work isn't blocked — but
+> enforcement is off); install `jq` to activate them.
 
 ## Running the gates
 
-The `checks/` scripts mechanise each guide's "How to verify" — a rule without a gate rots.
-They are **read-only** (they never modify your repo) and **opt-in** (nothing auto-installs).
+Enforcement splits by what does the job best — a rule without a gate rots, but the
+gate has to be a real control, not a home-grown grep pretending to be one:
+
+- **Secrets** → `gitleaks` · **SAST** (PII-in-logs, XSS sinks, `eval`, `target=_blank`)
+  → `semgrep` with [`checks/semgrep-governance.yml`](docs/governance/checks/semgrep-governance.yml).
+  These run in **CI as required status checks** — the control of record.
+- **Governance-specific gates** (requirements-first, honest story close-out) and a
+  **playbook self-lint** → [`checks/governance-checks.sh`](docs/governance/checks/governance-checks.sh),
+  read-only, runs locally and in CI. It covers only what no off-the-shelf scanner does.
 
 ```bash
-# 1. edit the CONFIG block at the top of the script for your project
-#    (PROJECT_TERMS, SOURCE_EXTS, SPEC_PATHS, SECRET_REGEX, PII_FIELDS)
-
-# 2. run it anytime — exit 0 = all green, non-zero = a gate failed (and prints why)
+# the governance-specific gates, locally (edit the CONFIG block first:
+# PROJECT_TERMS, SOURCE_EXTS, SPEC_PATHS — secrets/PII patterns live in semgrep now)
 bash docs/governance/checks/governance-checks.sh
 
-# 3. (optional) block bad commits — install the sample pre-commit hook
-cp docs/governance/checks/pre-commit.sample .git/hooks/pre-commit
-chmod +x .git/hooks/pre-commit
+# the real enforcement: copy the CI workflow and mark its jobs REQUIRED
+cp docs/governance/checks/ci.yml.sample .github/workflows/governance.yml
+#   then: Settings → Branches → require `secrets`, `sast`, `governance` to pass
+
+# (optional) fast local feedback — install the pre-commit hook
+cp docs/governance/checks/pre-commit.sample .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit
 ```
 
+A required CI check is one the author **cannot bypass**; a local hook is a convenience
+they can skip with `--no-verify`. That distinction is the whole point — *a bypassable
+gate is, to an auditor, no control*, so the secret/SAST scanners are wired as required
+checks, not left to the local script.
+
 At the **audit tier**, also run `docs/governance/scale/checks/assurance-checks.sh` as a
-**required CI status check the author cannot bypass** — a bypassable gate is, to an
-auditor, no control. Full configuration and per-gate detail:
+required CI check. Full configuration and per-gate detail:
 [`docs/governance/checks/README.md`](docs/governance/checks/README.md) and
 [`docs/governance/scale/checks/README.md`](docs/governance/scale/checks/README.md).
 

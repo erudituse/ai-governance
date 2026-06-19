@@ -1,0 +1,51 @@
+# Sample CI workflow — THIS is the enforcement the playbook relies on.
+#
+# Copy to .github/workflows/governance.yml, then in
+#   Settings → Branches → branch protection → "Require status checks to pass"
+# mark `secrets`, `sast`, and `governance` as REQUIRED.
+#
+# Why this and not just the local hook: a pre-commit hook is a convenience the
+# author can skip with `git commit --no-verify`. A required status check on a
+# protected branch is one they cannot bypass — and "a bypassable gate is, to an
+# auditor, no control." The local script is the fast feedback loop; this is the
+# control of record.
+#
+# (GitHub Actions shown; the shape ports to GitLab CI, CircleCI, etc.)
+name: governance
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  # --- secret scanning — full history, every language (replaces the old grep)
+  secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0          # full history so gitleaks scans every commit
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # --- SAST — PII-in-logs, XSS sinks, eval, plus a community pack
+  sast:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install semgrep
+      - run: >-
+          semgrep scan --error
+          --config docs/governance/checks/semgrep-governance.yml
+          --config p/owasp-top-ten
+
+  # --- the governance-specific gates no scanner does (self-lint + close-out)
+  governance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: bash docs/governance/checks/governance-checks.sh

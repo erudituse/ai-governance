@@ -1,2 +1,11 @@
 .DS_Store
 *.log
+
+# Claude Code: the governance hooks + shared settings SHIP with the kit, so they
+# are tracked. Only personal / transient state is ignored.
+.claude/settings.local.json
+.claude/*.lock
+.claude/projects/
+.claude/plans/
+.claude/todos/
+.claude/shell-snapshots/

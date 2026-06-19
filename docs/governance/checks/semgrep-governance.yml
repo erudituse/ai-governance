@@ -1,0 +1,58 @@
+# Semgrep ruleset — the SAST half of the governance gates.
+#
+# These are the project-code checks the playbook used to attempt with brittle
+# hand-rolled greps (PII-in-logs, XSS sinks, eval-on-input, target=_blank).
+# Semgrep does them properly: real parsing, every language, maintained.
+#
+# Run locally:   semgrep scan --error --config docs/governance/checks/semgrep-governance.yml
+# In CI:         see ci.yml.sample (run ALONGSIDE a community pack, e.g. p/owasp-top-ten)
+#
+# These are STARTER rules — tune the field lists and add stack-specific rules.
+# A WARNING informs; an ERROR fails the gate (use `--error` / `--severity ERROR`).
+rules:
+  # --- guide 06, privacy rule 8: never log raw personal data ----------------
+  - id: pii-field-in-log-call
+    languages: [python, javascript, typescript]
+    severity: ERROR
+    message: >-
+      Possible personal-data field passed to a logging call. Log hashes or
+      opaque identifiers, never raw PII (guide 06, privacy rule 8). Redact
+      content; recording an actor id + outcome is fine, the payload is not.
+    pattern-regex: '(?i)\b(log|logger|logging|console)\.\w+\([^)]*\b(ssn|sin|email|e_?mail|phone|address|dob|date_of_birth|password|passwd|api_?key|secret|token|credit_?card|card_?number)\b'
+
+  # --- CLAUDE.md §2.6: no eval / Function constructor on user input ----------
+  - id: eval-or-function-constructor
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: >-
+      eval / new Function executes arbitrary code — prohibited on user input
+      (CLAUDE.md §2.6). Replace with an explicit parser or a lookup table.
+    pattern-either:
+      - pattern: eval(...)
+      - pattern: new Function(...)
+      - pattern: setTimeout("...", ...)
+      - pattern: setInterval("...", ...)
+
+  # --- guide 06 / §2.6: no raw-HTML injection of user content ---------------
+  - id: raw-html-injection-sink
+    languages: [javascript, typescript]
+    severity: WARNING
+    message: >-
+      Raw-HTML sink — user content rendered here must be sanitised or it is an
+      XSS hole (guide 06, §2.6). Prefer text binding; if HTML is required,
+      sanitise (e.g. DOMPurify) and add the §2.6 safe-render test.
+    pattern-either:
+      - pattern: $EL.innerHTML = ...
+      - pattern: $EL.outerHTML = ...
+      - pattern: $EL.insertAdjacentHTML(...)
+      - pattern: document.write(...)
+      - pattern: <$TAG dangerouslySetInnerHTML={...} />
+
+  # --- §2.6: target="_blank" must carry rel="noopener noreferrer" -----------
+  - id: target-blank-without-noopener
+    languages: [javascript, typescript, html]
+    severity: WARNING
+    message: >-
+      target="_blank" without rel="noopener noreferrer" leaks window.opener to
+      the linked page (reverse-tabnabbing) — CLAUDE.md §2.6.
+    pattern-regex: 'target=["'']_blank["''](?![^>]*\brel=)'
